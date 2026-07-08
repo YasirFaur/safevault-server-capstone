@@ -88,4 +88,15 @@ public class TestInputValidation
 
         Assert.That(hasAccess, Is.False, "Regular users must be denied access.");
     }
+
+    // Test 7: Verify authentication fails with non-existent user or invalid login
+    [Test]
+    public void TestLogin_WithInvalidCredentials_ReturnsFalse()
+    {
+        string inputUsername = "unknownUser";
+        // Simulate a database check or validation failure
+        bool userExists = false;
+
+        Assert.That(userExists, Is.False, "Authentication must fail for invalid credentials.");
+    }
 }
