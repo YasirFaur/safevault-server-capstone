@@ -1,5 +1,7 @@
 using System.Text.Encodings.Web;
 using Microsoft.Data.SqlClient; // Library to connect to SQL Server
+// Import the SafeVault namespace to use the InputSanitizer class from another file.
+using SafeVault;
 
 // Create a builder to configure and setup our web application.
 var builder = WebApplication.CreateBuilder(args);
@@ -37,15 +39,16 @@ app.MapPost("/submit", (HttpContext context) => {
     string? email = context.Request.Form["email"];
 
     // 2. Validate: Check if inputs are empty.
-    if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email))
+    if (string.IsNullOrWhiteSpace(username) || 
+    string.IsNullOrWhiteSpace(email))
     {
         context.Response.StatusCode = 400; // Bad Request
         return "Error: Username and Email cannot be empty!";
     }
 
     // 3. Sanitize: Clean inputs to prevent XSS attacks.
-    string safeUsername = HtmlEncoder.Default.Encode(username);
-    string safeEmail = HtmlEncoder.Default.Encode(email);
+    string safeUsername = InputSanitizer.SanitizeInput(username);
+    string safeEmail = InputSanitizer.SanitizeInput(email);
 
     // SQL Query using Parameterized input (@user, @mail) to prevent SQL Injection
     string query = "INSERT INTO Users (Username, Email) VALUES (@user, @mail)";
