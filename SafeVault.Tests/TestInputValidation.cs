@@ -8,7 +8,7 @@ using SafeVault;
 [TestFixture]
 public class TestInputValidation
 {
-    // Define a test for checking SQL Injection defense
+    // test 1: Define a test for checking SQL Injection defense
     [Test]
     public void TestForSQLInjection()
     {
@@ -22,7 +22,7 @@ public class TestInputValidation
         Assert.That(sanitized, Is.Not.Contains("'"), "SQL injection characters must be removed.");
     }
 
-    // Define a test for checking Cross-Site Scripting (XSS) defense
+    // test 2: Define a test for checking Cross-Site Scripting (XSS) defense
     [Test]
     public void TestForXSS()
     {
@@ -37,5 +37,29 @@ public class TestInputValidation
 
         // Verify that dangerous HTML tags are encoded safely (checking for &lt;)
         Assert.That(sanitized.Contains("&lt;"), Is.True, "Dangerous HTML tags must be encoded.");
+    }
+
+    // Test 3: Verify that a correct password matches its hash
+    [Test]
+    public void TestCorrectPassword()
+    {
+        string password = "mySecret123!";
+        string hashedPassword = PasswordHasher.HashPassword(password);
+
+        bool result = PasswordHasher.VerifyPassword(password, hashedPassword);
+
+        Assert.That(result, Is.True, "The correct password must match the hash.");
+    }
+
+    // Test 4: Verify that an incorrect password fails to match the hash
+    [Test]
+    public void TestWrongPassword()
+    {
+        string password = "mySecret123!";
+        string hashedPassword = PasswordHasher.HashPassword(password);
+
+        bool result = PasswordHasher.VerifyPassword("wrongPassword", hashedPassword);
+
+        Assert.That(result, Is.False, "The wrong password must not match the hash.");
     }
 }
