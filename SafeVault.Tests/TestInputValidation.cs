@@ -1,39 +1,41 @@
-﻿// Import the NUnit framework for writing and running tests
+﻿namespace SafeVault;
+// Import the NUnit framework to run tests
 using NUnit.Framework;
-// Import the secure web encoding library to sanitize inputs
-using System.Text.Encodings.Web;
+// Import our server project to use the InputSanitizer class
+using SafeVault;
 
 // Mark this class as a collection of automated tests
 [TestFixture]
 public class TestInputValidation
 {
-    // Define a test method to check defense against SQL Injection attacks
+    // Define a test for checking SQL Injection defense
     [Test]
     public void TestForSQLInjection()
     {
-        // 1. Arrange: Create a dangerous SQL input that tries to bypass security
+        // Create a dangerous input containing malicious SQL characters
         string maliciousInput = "Admin' OR '1'='1";
 
-        // 2. Act: Simulate using parameterized queries which treat input purely as text, not code
-        bool isSecure = true;
+        // Use our new function to clean the dangerous input
+        string sanitized = InputSanitizer.SanitizeInput(maliciousInput);
 
-        // 3. Assert: Check and prove that the backend successfully handles this payload safely
-        Assert.That(isSecure, Is.True, "The system must handle SQL injection payloads safely using parameterized queries.");
+        // Verify that dangerous single quotes are completely removed
+        Assert.That(sanitized, Is.Not.Contains("'"), "SQL injection characters must be removed.");
     }
 
-    // Define a test method to check defense against Cross-Site Scripting (XSS) attacks
+    // Define a test for checking Cross-Site Scripting (XSS) defense
     [Test]
     public void TestForXSS()
     {
-        // 1. Arrange: Create a dangerous JavaScript payload that could exploit a browser
+        // Create a dangerous JavaScript payload
         string xssPayload = "<script>alert('hacked')</script>";
 
-        // 2. Act: Clean the dangerous text using the same encoder implemented in our server
-        string sanitizedOutput = HtmlEncoder.Default.Encode(xssPayload);
+        // Use our new function to clean the dangerous input
+        string sanitized = InputSanitizer.SanitizeInput(xssPayload);
 
-        // 3. Assert: Ensure the safe output is completely different from the dangerous input
-        Assert.That(sanitizedOutput, Is.Not.EqualTo(xssPayload), "The payload must be sanitized.");
-        // Assert: Verify that dangerous characters like < and > are converted to safe text entities
-        Assert.That(sanitizedOutput.Contains("&lt;script&gt;"), Is.True, "Dangerous HTML tags must be encoded.");
+        // Verify that the safe output is different from the dangerous input
+        Assert.That(sanitized, Is.Not.EqualTo(xssPayload), "The payload must be sanitized.");
+
+        // Verify that dangerous HTML tags are encoded safely (checking for &lt;)
+        Assert.That(sanitized.Contains("&lt;"), Is.True, "Dangerous HTML tags must be encoded.");
     }
 }
