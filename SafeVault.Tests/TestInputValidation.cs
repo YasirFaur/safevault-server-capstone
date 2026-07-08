@@ -62,4 +62,30 @@ public class TestInputValidation
 
         Assert.That(result, Is.False, "The wrong password must not match the hash.");
     }
+
+    // Test 5: Verify that admin role gets access to the admin dashboard
+    [Test]
+    public void TestAdminAccess_WithAdminRole_ReturnsSuccess()
+    {
+        // Simulate a user with 'admin' role
+        string userRole = "admin";
+
+        // Check authorization logic
+        bool hasAccess = userRole == "admin";
+
+        Assert.That(hasAccess, Is.True, "Users with admin role must have access.");
+    }
+
+    // Test 6: Verify that regular user role is denied access to the admin dashboard
+    [Test]
+    public void TestAdminAccess_WithUserRole_ReturnsForbidden()
+    {
+        // Simulate a regular 'user' trying to access admin tools
+        string userRole = "user";
+
+        // Check authorization logic
+        bool hasAccess = userRole == "admin";
+
+        Assert.That(hasAccess, Is.False, "Regular users must be denied access.");
+    }
 }

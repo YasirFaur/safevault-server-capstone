@@ -83,5 +83,57 @@ Explanation of this block:
 - StatusCode = 400: Tells the browser that the sent data is wrong or incomplete.
 */
 
+// Endpoint for secure user login and verification
+app.MapPost("/login", (HttpContext context) => {
+    // 1. Read input data from the form
+    string? username = context.Request.Form["username"];
+    string? password = context.Request.Form["password"];
+
+    // 2. Validate: Check if inputs are empty
+    if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+    {
+        context.Response.StatusCode = 400; // Bad Request
+        return "Error: Username and Password cannot be empty!";
+    }
+
+    // 3. Sanitize inputs to prevent injection and XSS
+    string safeUsername = InputSanitizer.SanitizeInput(username);
+    string safePassword = InputSanitizer.SanitizeInput(password);
+
+    // 4. Simulate a hashed password retrieved from the database for testing
+    // In a real app, you would fetch this from SQL using safeUsername
+    string mockHashedPasswordFromDb = PasswordHasher.HashPassword("mySecret123!");
+
+    // 5. Verify the entered password against the secure hash
+    bool isPasswordValid = PasswordHasher.VerifyPassword(safePassword, mockHashedPasswordFromDb);
+
+    // 6. Return the authentication result
+    if (isPasswordValid)
+    {
+        return $"Login Successful for user: {safeUsername}";
+    }
+    else
+    {
+        context.Response.StatusCode = 401; // Unauthorized
+        return "Error: Invalid credentials!";
+    }
+});
+// Endpoint for Admin Dashboard - Restricted by Role
+
+app.MapGet("/admin", (HttpContext context) => {
+    // 1. Simulate getting the user's role from session or token
+    // In a real app, this comes from a secure JWT token or Session
+    string userRole = context.Request.Headers["X-User-Role"].ToString();
+
+    // 2. Authorization Check: Only "admin" can enter
+    if (userRole != "admin")
+    {
+        context.Response.StatusCode = 403; // Forbidden
+        return "Access Denied: You do not have admin privileges!";
+    }
+
+    // 3. Grant access if the role matches
+    return "Welcome to the Admin Dashboard! Confidential data loaded.";
+});
 // Start the application and keep the server running to listen for requests.
 app.Run();
