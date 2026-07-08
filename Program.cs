@@ -16,15 +16,12 @@ app.UseStaticFiles();
 // Paste your Connection String here
 string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=SafeVaultDB;Integrated Security=True;";
 
-// Create a simple route for the main page to show a text message.
-app.MapGet("/", () => "SafeVault Server is Running!");
-/*
-Explanation of this line:
-- app.MapGet: Means "Hey server, when a user asks for a page...".
-- "/": Means the main page of the website.
-- () =>: Means "Run the next command right now".
-- "SafeVault is running!": The text message to show to the user.
-*/
+// Serve the main webform HTML file at the root URL
+app.MapGet("/", async (HttpContext context) =>
+{
+    context.Response.ContentType = "text/html";
+    await context.Response.SendFileAsync("wwwroot/webform.html");
+});
 
 // Create a route to receive data from the HTML form using POST method.
 // Update the POST route to validate and sanitize user inputs.
